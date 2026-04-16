@@ -923,8 +923,10 @@ function bindPendingAddButton(){
         var addBtn = document.getElementById('pending-add-btn');
         if(addBtn){
             function stopMapEvent(event){
-                event.stopPropagation();
-                event.preventDefault();
+                if(event){
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
             }
 
             addBtn.onmousedown = stopMapEvent;
@@ -941,6 +943,16 @@ function bindPendingAddButton(){
 
                 addSpotToCurrentRoute(pendingAddSpot);
             };
+
+            addBtn.addEventListener('touchend', function(event){
+                stopMapEvent(event);
+
+                if(document.activeElement){
+                    document.activeElement.blur();
+                }
+
+                addSpotToCurrentRoute(pendingAddSpot);
+            }, { passive: false });
         }
     }, 0);
 }
