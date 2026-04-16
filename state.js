@@ -334,3 +334,25 @@ function setLocationContext(context, options){
 
 var locationContext = loadLocationContext();
 var recentLocations = loadRecentLocations();
+
+function ensureSegmentState(route){
+    if(!route){
+        return;
+    }
+
+    if(!Array.isArray(route.spots)){
+        route.spots = [];
+    }
+
+    var expectedLength = Math.max(0, route.spots.length - 1);
+
+    if(!Array.isArray(route.segmentModes)){
+        route.segmentModes = [];
+    }
+
+    route.segmentModes = route.segmentModes.slice(0, expectedLength);
+
+    while(route.segmentModes.length < expectedLength){
+        route.segmentModes.push('walking');
+    }
+}
