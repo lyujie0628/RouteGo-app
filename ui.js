@@ -120,13 +120,10 @@ routes[newKey] = {
     title: '行程' + newIndex,
     startDate: '',
     startTime: '',
-    spots: [
-        {name:'西湖', position:[120.1551,30.2429]},
-        {name:'河坊街', position:[120.1706,30.2433]}
-    ],
-    segmentModes: ['walking'],
-    segmentInfos: [null]
-};
+    spots: [],
+    segmentModes: [],
+    segmentInfos: []
+}; //添加新list的时候list维持空白
 
 ensureRouteSegmentState(newKey);
     currentRouteKey = newKey;
@@ -255,6 +252,11 @@ function canDropToIndex(route, fromIndex, toIndex){
 }
 
 function getSpotCircleText(index){
+    // ✅ 只有1个点 → 显示“终”
+    if(spots.length === 1){
+        return '终';
+    }
+
     if(isStartSpot(index)){
         return '起';
     }
@@ -3398,3 +3400,29 @@ document.getElementById('edit-routes-btn').onclick = function(){
 
     renderRoute();
 };
+
+function deleteSpot(routeKey, index){
+    var route = routes[routeKey];
+
+    if(!route || !Array.isArray(route.spots)){
+        return;
+    }
+
+    if(index < 0 || index >= route.spots.length){
+        return;
+    }
+
+    // ✅ 删除点
+    route.spots.splice(index, 1);
+
+    // ✅ 修正 segmentModes（关键）
+    if(Array.isArray(route.segmentModes)){
+        var expectedLength = Math.max(0, route.spots.length - 1);
+        route.segmentModes = route.segmentModes.slice(0, expectedLength);
+    }
+
+    // ✅ 清掉路线绘制（避免残影）
+    if(typeof clearSegmentOverlays === 'function'){
+        clearSegmentOverlays();
+    }
+}
