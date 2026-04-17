@@ -1704,7 +1704,7 @@ function handleSearchGuideAction(action){
 function buildGuideActionsHtml(){
     return (
         '<div class="search-guide-section">' +
-            '<div class="search-guide-title">试试这些入口</div>' +
+            '<div class="search-guide-title">试试这些功能</div>' +
             '<div class="search-guide-list">' +
                 '<button class="search-guide-card" type="button" data-guide-action="nearby-spots">' +
                     '<span class="search-guide-card-title">附近看点</span>' +
@@ -2952,89 +2952,89 @@ li.innerHTML =
     };
 
     li.addEventListener('dragstart', function(event){
-    if(dragEnabledIndex !== index){
-        event.preventDefault();
+    if(dragEnabledIndex !== index){  // // 只有“被允许拖的这一项”才能开始拖
+        event.preventDefault();  // 如果当前这一项没有先被手柄“解锁”，就直接拦住
         return;
     }
 
-    draggedIndex = index;
-    li.classList.add('dragging');
+    draggedIndex = index;               // 记录：当前真正被拖起来的是哪一项
+    li.classList.add('dragging');         // 给当前项加一个样式，表示“正在拖动中”
 
-    if(event.dataTransfer){
+    if(event.dataTransfer){              // 告诉浏览器：这是一次“移动”操作，不是复制
         event.dataTransfer.effectAllowed = 'move';
     }
 });
 
-    li.addEventListener('dragend', function(){
-    li.classList.remove('dragging');
-    dragEnabledIndex = null;
+    li.addEventListener('dragend', function(){            
+    li.classList.remove('dragging');                  // // 拖动结束，不管成功没成功，先把“正在拖动”的样式去掉
+    dragEnabledIndex = null;                         // 关闭拖拽资格，相当于重新上锁
     li.draggable = false;
 
-    var allItems = document.querySelectorAll('#route-list li');
+    var allItems = document.querySelectorAll('#route-list li');       // 把所有列表项上“这里可以放下”的高亮提示都清掉
     allItems.forEach(function(item){
         item.classList.remove('drag-over');
     });
 
-    if(
-    draggedIndex !== null &&
-    dragTargetIndex !== null &&
-    canDropToIndex(currentRoute, draggedIndex, dragTargetIndex)
+    if(                                                            //如果
+    draggedIndex !== null &&                                       //1. 确实有被拖的项
+    dragTargetIndex !== null &&                                       // 2. 确实有目标位置
+    canDropToIndex(currentRoute, draggedIndex, dragTargetIndex)        //3. 这个目标位置是合法的
 ){
-    reorderSpot(currentRouteKey, draggedIndex, dragTargetIndex);
-    draggedIndex = null;
+    reorderSpot(currentRouteKey, draggedIndex, dragTargetIndex);            //// 改数据：把 spots 的顺序重新排一下
+    draggedIndex = null;                                               // 清空拖拽记录
     dragTargetIndex = null;
-    renderRoute();
-}else{
-    draggedIndex = null;
-    dragTargetIndex = null;
+    renderRoute();                                            // 重新渲染页面，让左侧列表和地图一起更新
+}else{                                                   
+    draggedIndex = null;                                         // 如果拖拽无效，也要把记录清空
+    dragTargetIndex = null; 
 }
 });
 
 li.addEventListener('dragover', function(event){
-    if(draggedIndex === null){
+    if(draggedIndex === null){              //// 如果当前没有正在拖的项，就什么都不做
         return;
     }
 
-    var canDropHere = canDropToIndex(currentRoute, draggedIndex, index);
+    var canDropHere = canDropToIndex(currentRoute, draggedIndex, index);  // 判断：当前这个位置能不能放下（是否合法）
 
-    if(!canDropHere){
+    if(!canDropHere){                  // 如果不合法，就清空目标位置
         dragTargetIndex = null;
         return;
     }
 
-    event.preventDefault();
-    dragTargetIndex = index;
+    event.preventDefault();                // 必须阻止默认行为，否则 drop 不会触发（浏览器机制）
+    dragTargetIndex = index;                 // 记录：当前“准备放到这里”
 
-    var allItems = document.querySelectorAll('#route-list li');
+    var allItems = document.querySelectorAll('#route-list li');      // 先清掉所有“可以放这里”的高亮提示
     allItems.forEach(function(item){
         item.classList.remove('drag-over');
     });
 
-    if(index !== draggedIndex){
+    if(index !== draggedIndex){                 // 如果不是拖到自己身上，就高亮当前项
         li.classList.add('drag-over');
     }
 });
 
-    li.addEventListener('dragleave', function(){
-        li.classList.remove('drag-over');
+    li.addEventListener('dragleave', function(){        // 鼠标拖走了，就把高亮提示去掉
+        li.classList.remove('drag-over');  
     });
 
-li.addEventListener('drop', function(event){
+li.addEventListener('drop', function(event){          // 如果没有正在拖的项，直接不处理
     if(draggedIndex === null){
         return;
     }
 
-    if(!canDropToIndex(currentRoute, draggedIndex, index)){
+    if(!canDropToIndex(currentRoute, draggedIndex, index)){        // 再次检查：这个位置是否合法（双保险）
         dragTargetIndex = null;
         return;
     }
 
-    event.preventDefault();
-    dragTargetIndex = index;
+    event.preventDefault();                    // 阻止默认行为（必须）
+    dragTargetIndex = index;                    // 最终确认：就是放在这里
 });
 
     routeList.appendChild(li);
-var lockBtn = li.querySelector('.lock-btn');
+var lockBtn = li.querySelector('.lock-btn');     // 找到“锁定按钮”（后面用来控制 isLocked）
 
 if(lockBtn){
     lockBtn.onclick = function(event){
@@ -3054,7 +3054,7 @@ if(lockBtn){
         }
 
         var selectedMode = btn.dataset.mode;
-        currentRoute.segmentModes[index] = selectedMode;
+        currentRoute.segmentModes[index] = selectedMode;                           //修改第 index 段的交通方式
         setSegmentInfo(currentRouteKey, index, null);
         renderRoute();
     };
@@ -3107,25 +3107,25 @@ if(routeNameInput){
 dragHandle.addEventListener('mousedown', function(event){
     event.stopPropagation();
 
-    if(spot.isLocked){
-        dragEnabledIndex = null;
-        li.draggable = false;
+    if(spot.isLocked){                     //按下手柄的时候如果手柄是锁定的
+        dragEnabledIndex = null;              //如果手柄是锁定的
+        li.draggable = false;               //禁止拖拽
         return;
     }
 
-    dragEnabledIndex = index;
-    li.draggable = true;
+    dragEnabledIndex = index;             //如果没有被锁定就允许被拖
+    li.draggable = true;            //打开拖拽功能
 });
 
-dragHandle.addEventListener('mouseup', function(){
-    dragEnabledIndex = null;
+dragHandle.addEventListener('mouseup', function(){        //鼠标松开时
+    dragEnabledIndex = null;                         //重新上锁
     li.draggable = false;
 });
 
-dragHandle.addEventListener('mouseleave', function(){
-    if(draggedIndex === null){
-        dragEnabledIndex = null;
-        li.draggable = false;
+dragHandle.addEventListener('mouseleave', function(){       //鼠标移开手柄区但是还没开始拖动
+    if(draggedIndex === null){           //如果当前没有进入拖拽状态
+        dragEnabledIndex = null;          //说明只是误触，不是真的要拖
+        li.draggable = false;        //重新上锁
     }
 });
 
@@ -3158,18 +3158,18 @@ var marker = new AMap.Marker({
         '</div>'
 });
 
-    marker.on('click', function(){
+    marker.on('click', function(){                                             //如果我点了地图上的某个点
         var allItems = document.querySelectorAll('#route-list li');
         allItems.forEach(function(item){
-            item.classList.remove('active-route');
+            item.classList.remove('active-route');                  //先把左边所有高亮取消
         });
 
-        var currentItem = allItems[index];
+        var currentItem = allItems[index];                     //找到和这个 marker 对应的那一行
         if(currentItem){
-            currentItem.classList.add('active-route');
+            currentItem.classList.add('active-route');                //只把那一行点亮
         }
 
-        map.setCenter(spot.position);
+        map.setCenter(spot.position);                       //顺便让地图中心对准它
     });
 
     currentMarkers.push(marker);
