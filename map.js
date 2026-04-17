@@ -440,7 +440,7 @@ function extractRouteMetaByMode(result, mode){
     return extractWalkingOrRidingRouteData(result);
 }
 
-function createSegmentPolyline(path, mode){
+function createSegmentPolyline(path, mode){                          //画出路线
     return new AMap.Polyline({
         path: path,
         strokeColor: modeColorMap[mode] || '#1677ff',
@@ -453,7 +453,7 @@ function createSegmentPolyline(path, mode){
     });
 }
 
-function createRouteServiceByMode(mode){
+function createRouteServiceByMode(mode){ //创造不同交通方式路线服务
     if(mode === 'driving'){
         return new AMap.Driving({
             hideMarkers: true
@@ -472,7 +472,7 @@ function createRouteServiceByMode(mode){
 }
 
 
-function runSegmentRouteSearch(startPoint, endPoint, mode){
+function runSegmentRouteSearch(startPoint, endPoint, mode){//查路线
     return new Promise(function(resolve){
         var service = createRouteServiceByMode(mode);
 
@@ -824,21 +824,24 @@ async function previewSearchRouteOnMap(routeItem){
     var firstPoint = routeItem.spots[0] && routeItem.spots[0].position;
     var allPositions = [];
     var mode = routeItem.routeMode || 'walking';
+var isTravelReferenceRoute = routeItem.routeKind === 'travel-city';
+var previewStrokeColor = isTravelReferenceRoute ? '#8b5cf6' : (modeColorMap[mode] || '#1677ff');//推荐路线颜色
+var previewStrokeStyle = isTravelReferenceRoute ? 'solid' : (mode === 'riding' ? 'dashed' : 'solid');//推荐路线的虚线
 
     if(Array.isArray(routeItem.validatedSegments) && routeItem.validatedSegments.length){
         routeItem.validatedSegments.forEach(function(segment){
             if(Array.isArray(segment.path) && segment.path.length > 1){
                 var polyline = new AMap.Polyline({
-                    path: segment.path,
-                    strokeColor: modeColorMap[mode] || '#1677ff',
-                    strokeWeight: 5,
-                    strokeOpacity: 0.88,
-                    lineJoin: 'round',
-                    lineCap: 'round',
-                    showDir: true,
-                    strokeStyle: mode === 'riding' ? 'dashed' : 'solid',
-                    zIndex: 130
-                });
+    path: segment.path,
+    strokeColor: previewStrokeColor,
+    strokeWeight: 5,
+    strokeOpacity: isTravelReferenceRoute ? 1 : 0.88,
+    lineJoin: 'round',
+    lineCap: 'round',
+    showDir: true,
+    strokeStyle: previewStrokeStyle,
+    zIndex: isTravelReferenceRoute ? 110 : 130
+});
                 overlays.push(polyline);
                 allPositions = allPositions.concat(segment.path);
             }
@@ -851,16 +854,16 @@ async function previewSearchRouteOnMap(routeItem){
 
             if(result && result.success && Array.isArray(result.path) && result.path.length > 1){
                 var line = new AMap.Polyline({
-                    path: result.path,
-                    strokeColor: modeColorMap[mode] || '#1677ff',
-                    strokeWeight: 5,
-                    strokeOpacity: 0.88,
-                    lineJoin: 'round',
-                    lineCap: 'round',
-                    showDir: true,
-                    strokeStyle: mode === 'riding' ? 'dashed' : 'solid',
-                    zIndex: 130
-                });
+    path: result.path,
+    strokeColor: previewStrokeColor,
+    strokeWeight: 5,
+    strokeOpacity: isTravelReferenceRoute ? 1 : 0.88,
+    lineJoin: 'round',
+    lineCap: 'round',
+    showDir: true,
+    strokeStyle: previewStrokeStyle,
+    zIndex: isTravelReferenceRoute ? 110 : 130
+});
                 overlays.push(line);
                 allPositions = allPositions.concat(result.path);
             }
